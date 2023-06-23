@@ -1,70 +1,53 @@
-import os
 import json
 
+def load_balance():
+    try:
+        with open('balance.json', 'r') as file:
+            data = json.load(file)
+            return data['balance']
+    except FileNotFoundError:
+        return 0
 
-# add variable to store the data
-data = []
-current_user = None
+def save_balance(balance):
+    data = {'balance': balance}
+    with open('balance.json', 'w') as file:
+        json.dump(data, file)
 
+def deposit(amount):
+    balance = load_balance()
+    balance += amount
+    save_balance(balance)
+    print(f"Successfully deposited ${amount}. New balance: ${balance}")
 
-def init_data():
-    data_dir = "./data"
-    json_file = "bank_data.json"
+def withdraw(amount):
+    balance = load_balance()
+    if amount > balance:
+        print("Insufficient funds!")
+    else:
+        balance -= amount
+        save_balance(balance)
+        print(f"Successfully withdrew ${amount}. New balance: ${balance}")
 
-    # Create the data directory if it doesn't exist
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-
-    # Create the JSON file if it doesn't exist
-    file_path = os.path.join(data_dir, json_file)
-    if not os.path.exists(file_path):
-        with open(file_path, "w") as file:
-            json.dump([], file)
-
-
-def check_pin(pin: int):
-    global data, current_user
-    data_dir = "./data"
-    json_file = "bank_data.json"
-    file_path = os.path.join(data_dir, json_file)
-
-    if not os.path.exists(file_path):
-        print("Something went wrong. Please try again later.")
-        quit()
-
-    with open(file_path, "r") as file:
-        data = json.load(file)
-
-    for i in range(len(data)):
-        if data[i]["pin"] == pin:
-            current_user = data[i]
-            print(current_user)
-            return
-    print("Wrong pin")
-
-
-def enter_pin():
+def show_menu():
     while True:
-        print("Please enter your pin\n")
-        pin = input()
-        if not pin.isdigit():
-            print("Please enter a valid pin")
-            return
-        int(pin)
-        if len(pin) != 4:
-            print("Please enter a valid pin")
-            return
+        print("==== Banking App Menu ====")
+        print("1. Deposit")
+        print("2. Withdraw")
+        print("3. Exit")
+
+        choice = input("Enter your choice (1-3): ")
+        if choice == '1':
+            amount = float(input("Enter the deposit amount: $"))
+            deposit(amount)
+        elif choice == '2':
+            amount = float(input("Enter the withdrawal amount: $"))
+            withdraw(amount)
+        elif choice == '3':
+            print("Exiting the program...")
+            break
         else:
-            check_pin(pin)
+            print("Invalid choice. Please try again.")
 
-
-def main():
-    init_data()
-    print("Welcome to the bank!\n")
-    enter_pin()
-
-
-if __name__ == "__main__":
-    main()
-
-
+# Entry point of the program
+if __name__ == '__main__':
+    show_menu()
